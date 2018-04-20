@@ -1,11 +1,16 @@
 package dev.sgp.web;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import dev.sgp.entite.Collaborateur;
+import dev.sgp.util.Constantes;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -20,12 +25,13 @@ public class EditerCollaborateurController extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		String matricule = req.getParameter("matricule");
-
-		if (matricule == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Un matricule est attendu");
-		} else {
-			resp.getWriter().write("Matricule : " + matricule);
+		List<Collaborateur> collabs = Constantes.COLLAB_SERVICE.listerCollaborateurs();
+		Optional<Collaborateur> collab = collabs.stream().filter(c -> c.getMatricule().equals(matricule)).findFirst();
+		
+		if (collab.isPresent()){
+			req.setAttribute("collab", collab.get());
 		}
+		req.getRequestDispatcher("/views/collab/editerCollaborateur.jsp").forward(req, resp);		
 	}
 
 	/* (non-Javadoc)
@@ -33,27 +39,6 @@ public class EditerCollaborateurController extends HttpServlet {
 	 */
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String matricule = req.getParameter("matricule");
-		String titre = req.getParameter("titre");
-		String nom = req.getParameter("nom");
-		String prenom = req.getParameter("prenom");
-
-		if (matricule == null || titre == null || nom == null || prenom == null) {
-			String response = "Les paramètres suivants sont incorrects :";
-			if (matricule == null)
-				response += " matricule";
-			if (titre == null)
-				response += " titre";
-			if (nom == null)
-				response += " nom";
-			if (prenom == null)
-				response += " prenom";
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, response);
-		} else {
-			resp.setStatus(HttpServletResponse.SC_CREATED);
-
-			resp.getWriter().write(String.format("Creation d’un collaborateur avec les informations suivantes : \n matricule=%s, titre=%s, nom=%s, prenom=%s ", matricule, titre, nom, prenom) );
-		}
-
+		
 	}
 }
